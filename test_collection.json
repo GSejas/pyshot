@@ -1,0 +1,57 @@
+
+{
+  "info": {
+    "name": "Pyshot API",
+    "description": "Collection of requests to test the Pyshot API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Take Screenshot",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8000/take?url=https://google.com",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["take"],
+          "query": [
+            {
+              "key": "url",
+              "value": "https://example.com"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Screenshot",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/screenshot/{screenshot_id}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["screenshot", "{screenshot_id}"],
+          "variable": [
+            {
+              "key": "screenshot_id",
+              "value": ""
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
