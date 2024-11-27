@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "pyshot"
+version = "0.1.0"
+description = "A FastAPI project"
+authors = ["Your Name <your.email@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.68.0"
+uvicorn = "^0.15.0"
+playwright = "^1.49.0"
+requests = "^2.26.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

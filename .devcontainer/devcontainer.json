@@ -1,17 +1,22 @@
 {
-    "name": "FastAPI Dev Environment",
-    "build": {
-      "dockerfile": "Dockerfile"
-    },
-    "settings": {
-      "terminal.integrated.shell.linux": "/bin/bash"
-    },
-    "extensions": [
-      "ms-python.python",
-      "ms-azuretools.vscode-docker",
-      "bungcip.better-toml"
-    ],
-    "postCreateCommand": "pip install -r requirements.txt",
-    "forwardPorts": [8000],
-    "remoteUser": "vscode"
-  }
+  "name": "FastAPI Dev Environment",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash",
+    "python.pythonPath": "/usr/local/bin/python",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.formatting.provider": "black",
+    "editor.formatOnSave": true
+  },
+  "extensions": [
+    "ms-python.python",
+    "ms-azuretools.vscode-docker",
+    "bungcip.better-toml"
+  ],
+  "postCreateCommand": "poetry install",
+  "forwardPorts": [8000],
+  "remoteUser": "vscode"
+}
