@@ -1,0 +1,17 @@
+{
+    "name": "FastAPI Dev Environment",
+    "build": {
+      "dockerfile": "Dockerfile"
+    },
+    "settings": {
+      "terminal.integrated.shell.linux": "/bin/bash"
+    },
+    "extensions": [
+      "ms-python.python",
+      "ms-azuretools.vscode-docker",
+      "bungcip.better-toml"
+    ],
+    "postCreateCommand": "pip install -r requirements.txt",
+    "forwardPorts": [8000],
+    "remoteUser": "vscode"
+  }
