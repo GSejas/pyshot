@@ -3,20 +3,50 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
-  "settings": {
-    "terminal.integrated.shell.linux": "/bin/bash",
-    "python.pythonPath": "/usr/local/bin/python",
-    "python.linting.enabled": true,
-    "python.linting.pylintEnabled": true,
-    "python.formatting.provider": "black",
-    "editor.formatOnSave": true
+  // Configure tool-specific properties.
+  "customizations": {
+    // Configure properties specific to VS Code.
+    "vscode": {
+      "settings": {},
+      "extensions": [
+        "streetsidesoftware.code-spell-checker"
+      ]
+    }
   },
-  "extensions": [
-    "ms-python.python",
-    "ms-azuretools.vscode-docker",
-    "bungcip.better-toml"
+  "postCreateCommand": [
+    "poetry install"
   ],
-  "postCreateCommand": "poetry install",
-  "forwardPorts": [8000],
-  "remoteUser": "vscode"
+  "forwardPorts": [
+    8000
+  ],
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers-extra/features/poetry:2": {
+      "version": "latest"
+    },
+    "ghcr.io/hspaans/devcontainer-features/pycqa:1": {
+      "doc8_version": "latest",
+      "docformatter_version": "latest",
+      "eradicate_version": "latest",
+      "isort_version": "latest",
+      "pydocstyle_version": "latest",
+      "pyflakes_version": "latest"
+    },
+    "ghcr.io/devcontainers-extra/features/black:2": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers-extra/features/coverage-py:2": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers-extra/features/flake8:2": {
+      "version": "latest",
+      "plugins": "flake8-black"
+    },
+    "ghcr.io/devcontainers-extra/features/isort:2": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers-extra/features/pylint:2": {
+      "version": "latest"
+    }
+  }
 }

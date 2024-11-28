@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import Depends, FastAPI, Query, HTTPException
 from fastapi.responses import StreamingResponse, FileResponse
 from playwright.sync_api import sync_playwright
 from io import BytesIO
@@ -6,15 +6,26 @@ from fastapi.responses import StreamingResponse
 import os
 import uuid
 from fastapi import FastAPI, HTTPException, Query, UploadFile, File
+from datetime import datetime
+import asyncio
+from .database import get_db
+from .models import Screenshot
+from .repo import ScreenshotRepo
+from .utils.screenshot_utils import take_screenshot_util
 
 app = FastAPI()
+
+# Ensure the event loop policy is set to ProactorEventLoop on Windows
+if os.name == 'nt':
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 # Directory to save screenshots
 SCREENSHOT_DIR = "screenshots"
 os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 
+
 @app.post("/take")
-async def take_screenshot(
+def take_screenshot(
     url: str = Query(..., description="The website to screenshot."),
     waitUntil: str = Query("load", description="Wait until event."),
     blockPopups: bool = Query(True, description="Block popups."),
@@ -22,61 +33,42 @@ async def take_screenshot(
     viewportDevice: str = Query(None, description="Viewport device."),
     viewportWidth: int = Query(1280, description="Viewport width."),
     viewportHeight: int = Query(720, description="Viewport height."),
-    deviceScaleFactor: int = Query(1, ge=1, le=5, description="Device scale factor.")
+    deviceScaleFactor: int = Query(1, ge=1, le=5, description="Device scale factor."),
+    fullPage: bool = Query(True, description="Capture full page."),
+    db = Depends(get_db)
 ):
     """
     Takes a screenshot of the specified URL with the given parameters.
 
     Args:
         url (str): The website to screenshot.
-        waitUntil (str): Wait until event.
-        blockPopups (bool): Block popups.
-        blockCookieBanners (bool): Block cookie banners.
-        viewportDevice (str): Viewport device.
-        viewportWidth (int): Viewport width.
-        viewportHeight (int): Viewport height.
+        waitUntil (str): Wait until event. Options are "load", "domcontentloaded", "networkidle".
+        blockPopups (bool): Block popups. Default is True.
+        blockCookieBanners (bool): Block cookie banners. Default is True.
+        viewportDevice (str): Viewport device. If specified, overrides viewportWidth and viewportHeight.
+        viewportWidth (int): Viewport width in pixels. Default is 1280.
+        viewportHeight (int): Viewport height in pixels. Default is 720.
         deviceScaleFactor (int): Device scale factor.
 
     Returns:
         dict: A dictionary containing the screenshot ID.
     """
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        page = browser.new_page(
-            viewport={"width": viewportWidth, "height": viewportHeight, "deviceScaleFactor": deviceScaleFactor}
-        )
+    screenshot_id, screenshot_filename = take_screenshot_util(
+        url, waitUntil, blockPopups, blockCookieBanners, viewportDevice, viewportWidth, viewportHeight, deviceScaleFactor, fullPage
+    )
 
-        # Block popups and cookie banners if specified
-        if blockPopups:
-            page.route("**/*", lambda route, request: route.abort() if request.resource_type == "popup" else route.continue_())
-        if blockCookieBanners:
-            page.evaluate_on_new_document("""
-                (() => {
-                    const style = document.createElement('style');
-                    style.type = 'text/css';
-                    style.innerHTML = '.cookie-banner { display: none !important; }';
-                    document.head.appendChild(style);
-                })();
-            """)
+    # Save screenshot metadata to the database
+    screenshot_db = ScreenshotRepo(db)
+    screenshot = Screenshot(id=screenshot_id, filename=screenshot_filename, timestamp=datetime.utcnow())
+    screenshot_db.add_screenshot(screenshot)
 
-        try:
-            page.goto(url, wait_until=waitUntil, timeout=10000)
-            screenshot_buffer = page.screenshot(full_page=True)
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Error capturing screenshot: {str(e)}")
-        finally:
-            browser.close()
-
-    # Save screenshot with a unique ID
-    screenshot_id = str(uuid.uuid4())
-    screenshot_path = os.path.join(SCREENSHOT_DIR, f"{screenshot_id}.png")
-    with open(screenshot_path, "wb") as f:
-        f.write(screenshot_buffer)
-
-    return {"screenshot_id": screenshot_id}
+    return {"screenshot_id": screenshot_id, "filename": screenshot_filename}
 
 @app.get("/screenshot/{screenshot_id}")
-async def get_screenshot(screenshot_id: str):
+async def get_screenshot(
+            screenshot_id: str,
+            db = Depends(get_db)
+        ):
     """
     Retrieves the screenshot by ID.
 
@@ -86,8 +78,23 @@ async def get_screenshot(screenshot_id: str):
     Returns:
         FileResponse: The screenshot file.
     """
-    screenshot_path = os.path.join(SCREENSHOT_DIR, f"{screenshot_id}.png")
-    if not os.path.exists(screenshot_path):
+    screenshot_db = ScreenshotRepo(db)
+    screenshot = screenshot_db.get_screenshot(screenshot_id)
+    if not screenshot:
         raise HTTPException(status_code=404, detail="Screenshot not found")
-
+    screenshot_path = os.path.join(SCREENSHOT_DIR, screenshot.filename)
     return FileResponse(screenshot_path, media_type="image/png")
+
+@app.get("/screenshots")
+async def list_screenshots(
+            db = Depends(get_db)
+        ):
+    """
+    Lists all screenshots.
+
+    Returns:
+        list: A list of screenshot filenames.
+    """
+    screenshot_db = ScreenshotRepo(db)
+    screenshots = screenshot_db.list_screenshots()
+    return {"screenshots": [{"id": s.id, "filename": s.filename, "timestamp": s.timestamp} for s in screenshots]}
