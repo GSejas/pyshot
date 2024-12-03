@@ -55,7 +55,7 @@ jobs:
 
       - name: Run tests
         run: |
-          poetry run pytest tests
+          poetry run pytest tests/unit
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -79,7 +79,7 @@ jobs:
 
       - name: Run Docker container and execute tests
         run: |
-          docker run --rm pyshot:latest poetry run pytest tests
+          docker run --rm pyshot:latest poetry run pytest tests/integration
 
   package:
     runs-on: ubuntu-latest
