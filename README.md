@@ -20,14 +20,14 @@ A FastAPI project for taking screenshots of websites using Playwright.
     poetry install
     ```
 
-## Running the Service
+## Running the Application
 
-1. Start the FastAPI server:
-    ```sh
-    poetry run uvicorn pyshot.screenshot_router:app --reload
-    ```
+To start the application, use the following command:
+```
+poetry run uvicorn pyshot:app --reload
+```
 
-2. The service will be available at `http://localhost:8000`.
+The service will be available at `http://localhost:8000`.
 
 ## Endpoints
 
@@ -226,4 +226,4 @@ GET /screenshots
     }
   ]
 }
-```
+````

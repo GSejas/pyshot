@@ -11,6 +11,14 @@ Base = declarative_base()
 
 
 def get_db():
+    """
+    Provides a database session for use in a context manager.
+
+    Yields:
+        SessionLocal: A SQLAlchemy database session.
+
+    Ensures that the database session is properly closed after use.
+    """
     db = SessionLocal()
     try:
         yield db

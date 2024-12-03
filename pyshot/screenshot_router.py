@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException
 from fastapi.responses import StreamingResponse, FileResponse
 from playwright.sync_api import sync_playwright
 from io import BytesIO
@@ -13,7 +13,7 @@ from .models import Screenshot
 from .repo import ScreenshotRepo
 from .utils.screenshot_utils import take_screenshot_util
 
-app = FastAPI()
+router = APIRouter()
 
 # Ensure the event loop policy is set to ProactorEventLoop on Windows
 if os.name == 'nt':
@@ -24,7 +24,7 @@ SCREENSHOT_DIR = "screenshots"
 os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 
 
-@app.post("/take")
+@router.post("/take")
 def take_screenshot(
     url: str = Query(..., description="The website to screenshot."),
     waitUntil: str = Query("load", description="Wait until event."),
@@ -64,7 +64,7 @@ def take_screenshot(
 
     return {"screenshot_id": screenshot_id, "filename": screenshot_filename}
 
-@app.get("/screenshot/{screenshot_id}")
+@router.get("/screenshot/{screenshot_id}")
 async def get_screenshot(
             screenshot_id: str,
             db = Depends(get_db)
@@ -85,7 +85,7 @@ async def get_screenshot(
     screenshot_path = os.path.join(SCREENSHOT_DIR, screenshot.filename)
     return FileResponse(screenshot_path, media_type="image/png")
 
-@app.get("/screenshots")
+@router.get("/screenshots")
 async def list_screenshots(
             db = Depends(get_db)
         ):
