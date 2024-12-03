@@ -1,12 +1,14 @@
-
 FROM mcr.microsoft.com/playwright:v1.49.0-noble
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install Poetry
-RUN apt-get update && apt-get install -y curl
-RUN curl -sSL https://install.python-poetry.org | python
+# Install Python
+RUN apt-get update && apt-get install -y python3 python3-pip && \
+    ln -s /usr/bin/python3 /usr/bin/python && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN curl -sSL https://install.python-poetry.org | python3 -
 
 # Add Poetry to PATH
 ENV PATH="${PATH}:/root/.local/bin"
@@ -22,7 +24,7 @@ COPY . /pyshot
 WORKDIR /pyshot
 
 # Install dependencies and playwright
-RUN poetry install && poetry run playwright install
+RUN poetry install --no-root && poetry run playwright install
 
 # Expose ports
 EXPOSE 8000

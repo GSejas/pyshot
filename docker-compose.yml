@@ -1,15 +1,14 @@
 
 version: "3.8"
 services:
-  tutorial:
+  pyshot:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
-    volumes:
-      - .:/pyshot
-      - /pyshot/screenshots
+    environment:
+      - PATH=/root/.local/bin:$PATH
     command:
       [
         "poetry",
