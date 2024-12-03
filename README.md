@@ -60,6 +60,18 @@ You can also run the service using Docker:
     docker run -p 8000:8000 pyshot
     ```
 
+## Using Docker componse:
+
+### Re-build
+
+  ```sh
+  docker-compose down
+  docker-compose build --no-cache
+  docker-compose up
+
+  ```
+
+
 The service will be available at `http://localhost:8000`.
 
 

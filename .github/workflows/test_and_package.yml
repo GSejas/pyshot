@@ -14,7 +14,7 @@ name: Test and Package
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   test:
