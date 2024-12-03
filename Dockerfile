@@ -1,29 +1,19 @@
-FROM python:3.10-slim   
 
+FROM mcr.microsoft.com/playwright:v1.49.0-noble
 
-ENV DEBIAN_FRONTEND='noninteractive'
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install Poetry
-RUN apt-get update && apt install -y curl
+RUN apt-get update && apt-get install -y curl
 RUN curl -sSL https://install.python-poetry.org | python
 
 # Add Poetry to PATH
 ENV PATH="${PATH}:/root/.local/bin"
-RUN poetry config virtualenvs.in-project true && mkdir -p /screenshots
+RUN poetry config virtualenvs.in-project true
 
-RUN echo "deb http://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list \
-    && apt-get update
-
-# Install Node.js (required for Playwright)
-RUN curl -sL https://deb.nodesource.com/setup_21.x | bash - && \
-    apt-get install -y nodejs
-
-# Install Playwright globally
-RUN npm install -g playwright
-
-# Install system dependencies
-RUN playwright install-deps
-# RUN poetry run playwright install
+# Create a directory for screenshots
+RUN mkdir -p /screenshots
 
 # Copy the application code
 COPY . /pyshot
@@ -31,8 +21,11 @@ COPY . /pyshot
 # Set the working directory
 WORKDIR /pyshot
 
-
 # Install dependencies and playwright
-RUN poetry install && poetry run playwright install && playwright install-deps
-RUN poetry add uvicorn
+RUN poetry install && poetry run playwright install
+
+# Expose ports
 EXPOSE 8000
+
+# Start the FastAPI server
+CMD ["poetry", "run", "uvicorn", "pyshot.screenshot_router:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
