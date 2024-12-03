@@ -51,7 +51,11 @@ jobs:
 
       - name: Install dependencies with Poetry
         run: |
-          poetry install
+          poetry install --no-root
+      - name: Ensure browsers are installed
+        run: |
+          poetry run playwright install --with-deps
+
 
       - name: Run tests
         run: |
