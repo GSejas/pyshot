@@ -2,7 +2,7 @@
 import os
 import pytest
 from fastapi.testclient import TestClient
-from pyshot.screenshot_router import app, SCREENSHOT_DIR
+from pyshot import app, SCREENSHOT_DIR
 
 client = TestClient(app)
 
