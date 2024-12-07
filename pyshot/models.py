@@ -3,6 +3,7 @@ from sqlalchemy import Column, String, DateTime
 from .database import Base
 from datetime import datetime
 
+
 class Screenshot(Base):
     """
     Represents a screenshot record in the database.

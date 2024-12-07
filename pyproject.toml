@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "pyshot"
 version = "0.1.0"
-description = "A FastAPI project"
+description = "Screenshot API service with Playwright"
 authors = ["Your Name <your.email@example.com>"]
 
 [tool.poetry.dependencies]

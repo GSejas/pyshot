@@ -59,7 +59,7 @@ jobs:
 
       - name: Run tests
         run: |
-          poetry run pytest tests/unit
+          poetry install && poetry run pytest tests/unit
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
